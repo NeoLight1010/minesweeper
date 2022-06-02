@@ -28,9 +28,9 @@ impl Display for Minesweeper {
                 let pos = (x, y);
 
                 if !self.open_fields.contains(&pos) {
-                    f.write_str("⬜")?;
+                    f.write_str("□")?;
                 } else if self.mines.contains(&pos) {
-                    f.write_str("💣")?;
+                    f.write_str("*")?;
                 } else {
                     write!(f, "{}", self.neighboring_mines(pos))?;
                 }
