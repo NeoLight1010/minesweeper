@@ -1,4 +1,7 @@
-use std::{collections::HashSet, fmt::{Display, Write}};
+use std::{
+    collections::HashSet,
+    fmt::{Display, Write},
+};
 
 use random::random_range;
 
@@ -27,7 +30,9 @@ impl Display for Minesweeper {
             for x in 0..self.width {
                 let pos = (x, y);
 
-                if !self.open_fields.contains(&pos) {
+                if self.flagged_fields.contains(&pos) {
+                    f.write_str("f")?;
+                } else if !self.open_fields.contains(&pos) {
                     f.write_str("□")?;
                 } else if self.mines.contains(&pos) {
                     f.write_str("*")?;
@@ -79,15 +84,31 @@ impl Minesweeper {
             .count() as u8
     }
 
-    pub fn open(&mut self, position: Position) -> OpenResult {
+    pub fn open(&mut self, position: Position) -> Option<OpenResult> {
+        if self.flagged_fields.contains(&position) {
+            return None;
+        }
+
         self.open_fields.insert(position);
 
         let is_mine = self.mines.contains(&position);
 
         if is_mine {
-            OpenResult::Mine
+            Some(OpenResult::Mine)
         } else {
-            OpenResult::NoMine(0)
+            Some(OpenResult::NoMine(0))
+        }
+    }
+
+    pub fn toggle_flag(&mut self, position: Position) {
+        if self.open_fields.contains(&position) {
+            return;
+        }
+
+        if self.flagged_fields.contains(&position) {
+            self.flagged_fields.remove(&position);
+        } else {
+            self.flagged_fields.insert(position);
         }
     }
 }
@@ -101,6 +122,7 @@ mod test {
         let mut ms = Minesweeper::new(10, 10, 5);
 
         ms.open((5, 5));
+        ms.toggle_flag((6, 6));
 
         println!("{}", ms);
     }
